@@ -27,3 +27,7 @@ Ada 6 fungsi utama push protocol (sudut pandang dari sisi client):
 5. Command Reply (Membalas Perintah dari Pusat)
 6. Remote Attendance (Laporan Kehadiran Jarak Jauh/tidak di tempat)
 
+Sumber dari [nufaza push_protocol](https://docs.nufaza.com/docs/devices/zkteco_attendance/push_protocol/ "The best search engine for privacy").
+
+
+
