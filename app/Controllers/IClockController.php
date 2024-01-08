@@ -67,6 +67,9 @@ Encrypt=None");
         string $SN,
         array $rawData
     ) {
+//        222310045	2023-11-16 17:31:37	1	1	0	0	0	0	0	0
+//        222310045	2023-11-16 17:31:37	1	1	0	0	0	0	0	0
+
         $options = [
             'baseURI' => env('main.server_host'),
             'timeout' => 3,
@@ -85,33 +88,32 @@ Encrypt=None");
             if ($line != '') {
                 $user_id = $data[0];//contains the first value (e.g., 114)
                 $date = $data[1];//contains the timestamp (e.g., 2023-09-23 01:28:15)
-                $status = $data[2]; //, $data[3], $data[4], $data[5], etc., contain other values
-                // Do something with the parsed data
-                // For example, you can insert it into a database or perform any other processing
-
-                $data = [
-                    'user_id' => $user_id,
-                    'sn' => $SN,
-                    'status' => $status,
-                    'date' => $date,
-                    'upload' => 0
-                ];
-                $getLogId = $attlogModel->insert($data);
-                $respond = $client->request('POST', '/attlog', [
-                    'form_params' => [
+                $status = $data[2]; //, $data[3], $data[4], $data[5], etc., contain other
+                if ($attlogModel->check($user_id, $date, $status) == 0 && $data[0] != '') {
+                    $data = [
                         'user_id' => $user_id,
                         'sn' => $SN,
                         'status' => $status,
                         'date' => $date,
-                    ]
-                ]);
-                log_message('info', 'Respond: ' . $respond->getBody());
-                if ($respond->getBody() == 'OK') {
-                    $attlogModel->update($getLogId, ['upload' => 1]);
+                        'upload' => 0
+                    ];
+                    log_message('info', 'HumanData: ' . json_encode($data));
+                    $getLogId = $attlogModel->insert($data);
+                    $respond = $client->request('POST', '/attlog', [
+                        'form_params' => [
+                            'user_id' => $user_id,
+                            'sn' => $SN,
+                            'status' => $status,
+                            'date' => $date,
+                        ]
+                    ]);
+
+                    if ($respond->getBody() == 'OK') {
+                        $attlogModel->update($getLogId, ['upload' => 1]);
+                    }
                 }
             }
         }
-        echo 'OK';
-        return $this->response->setBody('OK');
+        echo "OK";
     }
 }

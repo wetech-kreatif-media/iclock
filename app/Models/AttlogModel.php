@@ -10,7 +10,13 @@ class AttlogModel extends Model
 
     protected $primaryKey = 'id'; // Set the primary key field name
 
-    protected $allowedFields = ['user_id', 'sn', 'status', 'date', 'upload']; // Define the fields that can be inserted or updated
+    protected $allowedFields = [
+        'user_id',
+        'sn',
+        'status',
+        'date',
+        'upload'
+    ]; // Define the fields that can be inserted or updated
 
     protected $useTimestamps = false; // Set to true if you want to use created_at and updated_at timestamps
 
@@ -19,4 +25,14 @@ class AttlogModel extends Model
 
 
     // Other model methods and properties can be added as needed
+
+
+    function check($user_id, $date, $status): int
+    {
+        $builder = $this->builder();
+        $builder->where('user_id', $user_id);
+        $builder->where('date', $date);
+        $builder->where('status', $status);
+        return $builder->get()->getNumRows();
+    }
 }
