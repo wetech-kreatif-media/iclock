@@ -24,15 +24,20 @@ class AttlogModel extends Model
     protected $validationRules = [];
 
 
-    // Other model methods and properties can be added as needed
-
-
     function check($user_id, $date, $status): int
     {
-        $builder = $this->builder();
-        $builder->where('user_id', $user_id);
-        $builder->where('date', $date);
-        $builder->where('status', $status);
-        return $builder->get()->getNumRows();
+        return $this->where('user_id', $user_id)
+            ->where('date', $date)
+            ->where('status', $status)
+            ->get()->getNumRows();
     }
+
+    function check_zero_upload(): array
+    {
+        return $this->where('upload', 0)
+            ->orderBy('date', 'DESC')
+            ->limit(10)
+            ->get()->getResultArray();
+    }
+
 }

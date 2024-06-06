@@ -2,9 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Data\AttlogEntity;
+use App\Libraries\UploadAttlog;
 use App\Models\AttlogModel;
 use CodeIgniter\RESTful\ResourceController;
-use Config\Services;
 
 class IClockController extends ResourceController
 {
@@ -65,20 +66,12 @@ Encrypt=None");
 
     public function attlog(
         string $SN,
-        array $rawData
-    ) {
+        array  $rawData
+    )
+    {
 //        222310045	2023-11-16 17:31:37	1	1	0	0	0	0	0	0
 //        222310045	2023-11-16 17:31:37	1	1	0	0	0	0	0	0
 
-        $options = [
-            'baseURI' => env('main.server_host'),
-            'timeout' => 3,
-            'headers' => [
-                'key' => env('main.server_key'),
-            ],
-            'verify' => false
-        ];
-        $client = Services::curlrequest($options);
         $attlogModel = new AttlogModel();
         log_message('info', 'SN: ' . $SN);
         log_message('info', 'RawData: ' . json_encode($rawData));
@@ -90,27 +83,19 @@ Encrypt=None");
                 $date = $data[1];//contains the timestamp (e.g., 2023-09-23 01:28:15)
                 $status = $data[2]; //, $data[3], $data[4], $data[5], etc., contain other
                 if ($attlogModel->check($user_id, $date, $status) == 0 && $data[0] != '') {
-                    $data = [
-                        'user_id' => $user_id,
-                        'sn' => $SN,
-                        'status' => $status,
-                        'date' => $date,
-                        'upload' => 0
-                    ];
-                    log_message('info', 'HumanData: ' . json_encode($data));
-                    $getLogId = $attlogModel->insert($data);
-                    $respond = $client->request('POST', '/attlog', [
-                        'form_params' => [
-                            'user_id' => $user_id,
-                            'sn' => $SN,
-                            'status' => $status,
-                            'date' => $date,
-                        ]
-                    ]);
+                    $attlogEntity = new AttlogEntity(
+                        0,
+                        $user_id,
+                        $SN,
+                        $status,
+                        $date,
+                        0
+                    );
 
-                    if ($respond->getBody() == 'OK') {
-                        $attlogModel->update($getLogId, ['upload' => 1]);
-                    }
+                    log_message('info', 'HumanData: ' . json_encode($data));
+                    $getLogId = $attlogModel->insert($attlogEntity->getDataArray());
+                    $attlogEntity->setId($getLogId);
+                     (new UploadAttlog())->post($attlogEntity);
                 }
             }
         }
