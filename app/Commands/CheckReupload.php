@@ -26,8 +26,8 @@ class CheckReupload extends BaseCommand
             $attlogEntity->setStatus($value['status']);
             $attlogEntity->setDate($value['date']);
             $attlogEntity->setUpload($value['upload']);
-            $status = (new UploadAttlog())->post($attlogEntity);
-            CLI::write("ID: $value[id] $status", 'green');
+            $uploaded = (new UploadAttlog())->post($attlogEntity);
+            CLI::write("ID: $value[id] UPLOADED: $uploaded, ".json_encode($attlogEntity->getDataArray()), 'green');
         }
         CLI::write('Finish run script', 'green');
     }

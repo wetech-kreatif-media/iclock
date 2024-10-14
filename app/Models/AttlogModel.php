@@ -36,7 +36,6 @@ class AttlogModel extends Model
     {
         return $this->where('upload', 0)
             ->orderBy('date', 'DESC')
-            ->limit(10)
             ->get()->getResultArray();
     }
 
